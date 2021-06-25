@@ -5,13 +5,6 @@ import { UnorderedListOutlined,CopyOutlined,LeftOutlined,DesktopOutlined, Idcard
 import React from 'react';
 import { Tabs } from 'antd';
 import { Link } from 'react-router-dom'
-import ReactDOM from 'react-dom';
-import { Redirect } from 'react-router'
-import { Image } from 'antd';
-import { Card } from 'antd';
-// import  "./QB_content.css";
-// import axios from 'axios';
-//import {createXHR} from "../../js/xhr.js"
 
 import {
   AppstoreOutlined,
