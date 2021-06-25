@@ -1,207 +1,283 @@
-import { Input, Select, Layout, Menu, Descriptions, Button, Modal, Table } from 'antd';
-import { UnorderedListOutlined,CopyOutlined,LeftOutlined,DesktopOutlined, IdcardOutlined, 
-          ReadOutlined, MailOutlined, SettingOutlined, 
-          PlayCircleOutlined,BorderOutlined } from '@ant-design/icons';
+import {InputNumber, Input,Radio,Form, Upload,message, Layout, Menu, Button, Modal, Table } from 'antd';
+import { UnorderedListOutlined,CopyOutlined,LeftOutlined, InboxOutlined} from '@ant-design/icons';
 import React from 'react';
+import axios from 'axios';
 import { Tabs } from 'antd';
 import { Link } from 'react-router-dom'
+import ReactDOM from 'react-dom';
+import { Redirect } from 'react-router'
+import { Image } from 'antd';
+import { Card } from 'antd';
+import 'antd/dist/antd.css';
 
-import {
-  AppstoreOutlined,
-  BarChartOutlined,
-  CloudOutlined,
-  ShopOutlined,
-  TeamOutlined,
-  UserOutlined,
-  HighlightOutlined,
-  BookOutlined,
-  VideoCameraOutlined,
-} from '@ant-design/icons';
-
+const { TextArea } = Input;
 const { Header, Content, Footer, Sider } = Layout;
 const { TabPane } = Tabs;
 const { Search } = Input;
-const columns = [
-  {
-    title: "Subject",
-    width: "11%",
-    dataIndex: "subject",
- //   render: (text) => <a href="#">{text}</a>
-  },
-  {
-    title: "type",
-    width: "4%",
-    dataIndex: "type"
-  },
-  {
-    title: "stem",
-    dataIndex: "stem",
-    width: "35%",
-    onCell: ()=>{
-      return  {
-        style: {
-          maxWidth: 260, overflow: 'hidden', 
-          whiteSpace: 'nowrap', textOverflow: 'ellipsis', cursor: 'pointer',
-          WordBreak: 'keep-all'
-        }
-      }
-    },
-    render: (text)=>{
-      let snArray = [];
-      snArray = text.toString().split(".");
-      let result = null;
-      let br = <br></br>;
-      for(let i = 0; i < snArray.length; i++ ) {
-        if ( i==0 ) {
-          result = snArray[i];
-        } else {
-          result = <span>{result}{br}{snArray[i]}</span>;
-        }
-      }
-      return <div placement="topLeft" title={text}>{result}</div>
-    }
-  },
-  {
-    title: "choice",
-    dataIndex: "choice",
-    onCell: ()=>{
-      return  {
-        style: {
-          maxWidth: 260, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', cursor: 'pointer'
-        }
-      }
-    },
-    render: (text, record)=>{
-      let br=<br></br>;
-      let result=null;
-      let snArray = [];
-      snArray = text;
-      for(let i = 0; i < snArray.length; i++ ) {
-        if ( i == 0 ) {
-          result = snArray[i];
-        } else {
-          result = <span >{result}{br}{snArray[i]}</span>;
-        }
-      }
-      return <div placement="topLeft" title={text}>{result}</div>;
-    }
-  },
-  {
-    title: "answer",
-    dataIndex: "answer",
-    width: "3%",
-    onCell: ()=>{
-      return  {
-        style: {
-          color: "red"
-        }
-      }
-    },
-  },
-  {
-    title: "else",
-    dataIndex: "else",
-    render:(text, record)=>{
-      let snArray = [];
-      let result = null;
-      let br = <br></br>;
-      snArray = text;
-      for ( let i = 0; i < text.length; i++ ) {
-        if ( i==0 ) {
-          result = snArray[i];
-        } else {
-          result = <span>{result}{br}{snArray[i]}</span>;
-        }
-      }
-      return <div>{result}</div>;
-    }
-  }
-];
-
-const data = [
-  {
-    key: "1",
-    subject: "高级数据结构",
-    type: "选择",
-    choice: [
-      "A. Upon the termination of the algorithm, the algorithm returns a cut (A,B) so that 2.5w(A,B)≥w(A∗ ,B∗ ), where (A∗ ,B∗ ) is an optimal partition.",
-      "B. When there are many candidate jobs that can be moved to reduce the absolute difference, if we always move the job j with maximum t j , then the local search terminates in at most n moves.",
-      "C. The local search algorithm always returns an optimal solution.",
-      "D. The local search algorithm always returns a local solution with 1/2 T​1 ≤T2 ≤ 2T1."
-    ] ,
-    stem: "Max-cut problem: Given an undirected graph G=(V,E) with positive integer edge weights we, find a node partition (A,B) such that w(A,B), the total weight of edges crossing the cut, is maximized. Let us define S′ be the neighbor of S such that S′ can be obtained from S by moving one node from A to B, or one from B to A. We only choose a node which, when flipped, increases the cut value by at least w(A,B)/∣V∣. Then which of the following is true?",
-    answer:"B",
-    else: [
-      "分值：5分",
-      "出题人：叶德仕"
-    ]
-  },
-  {
-    key: "2",
-    subject: "高级数据结构",
-    type: "选择",
-    stem: "London No. 1 Lake Park",
-    choice: "hello",
-    else: [
-      "else"
-    ]
-  },
-  {
-    key: "3",
-    subject: "高级数据结构",
-    type: "选择",
-    stem: "Sidney No. 1 Lake Park",
-    choice: "hello",
-    else: []
-  },
-  {
-    key: "4",
-    subject: "高级数据结构",
-    type: "选择",
-    stem: "Sidney No. 1 Lake Park",
-    choice: "hello",
-    else: []
-  }
-];
+const { Dragger } = Upload;
 function callback(key) {
     console.log(key);
 }
 
- function search() {
-//   let xh = createXHR();
-//   let url="testing.php?hel=helloWorld";
-//   xh.open("GET", url, true);
-// //	xh.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-//   xh.send("hel=helloword");
-//   xh.responseType = "text";
-//   xh.onreadystatechange=function() {
-//       if (xh.readyState==4) {
-//         if(xh.status==200||xh.status==0) {
-//           alert(xh.responseText);
-//         }
-//     }
-//   }
-}
-// function search(){
-//   axios.request({
-//       url:'http://localhost:3000/src/pages/TeacherCenter/testing.php',
-//       method:'get',
-//       // baseURL:'http://localhost:8008'
-//  }).then(
-//     res => {
-//       console.log("get res:",res);
-//       var str=JSON.stringify(res);
-//       document.getElementById("testing").innerHTML = str;
-//    },error => {
-//       console.log("get request failed:",error);
-//       document.getElementById("testing").innerHTML = error;
-//    }
-//  );
-// }
+
+const props_upload = {
+  name: 'file',
+  multiple: true,
+  action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+  onChange(info) {
+    const { status } = info.file;
+    if (status !== 'uploading') {
+      console.log(info.file, info.fileList);
+    }
+    if (status === 'done') {
+      message.success(`${info.file.name} 文件上传成功`);
+    } else if (status === 'error') {
+      message.error(`${info.file.name} 文件上传失败`);
+    }
+  },
+  onDrop(e) {
+    console.log('Dropped files', e.dataTransfer.files);
+  },
+};
+
+
+const columns = [
+  {
+    title: '题干',
+    dataIndex: 'stem',
+    width:'25%',
+    onCell: ()=>{
+      return  {
+        style: {
+          maxWidth: 200, wordBreak:'breakall' , whiteSpace: 'prewrap', wordWrap:'breakword'
+        }
+      }
+    }, 
+           
+  },
+  {
+    title: '题型',
+    dataIndex: 'type',
+    width:'5%',
+    onCell: ()=>{
+      return  {
+        style: {
+          maxWidth: 50, wordBreak:'breakall' , whiteSpace: 'prewrap', wordWrap:'breakword'
+        }
+      }
+    }, 
+           
+  },
+  {
+    title: 'A选项',
+    dataIndex: 'optionA',
+    width:'15%',
+    onCell: ()=>{
+      return  {
+        style: {
+          maxWidth: 100, wordBreak:'breakall' , whiteSpace: 'prewrap', wordWrap:'breakword'
+        }
+      }
+    }, 
+  },
+  {
+    title: 'B选项',
+    dataIndex: 'optionB',
+    width:'15%',
+    onCell: ()=>{
+      return  {
+        style: {
+          maxWidth: 100, wordBreak:'breakall' , whiteSpace: 'prewrap', wordWrap:'breakword'
+        }
+      }
+    },  
+  },
+  {
+    title: 'C选项',
+    dataIndex: 'optionC',
+    width:'15%',
+    onCell: ()=>{
+      return  {
+        style: {
+          maxWidth: 100, wordBreak:'breakall' , whiteSpace: 'prewrap', wordWrap:'breakword'
+        }
+      }
+    },  
+  },
+  {
+    title: 'D选项',
+    dataIndex: 'optionD',
+    width:'15%',
+    onCell: ()=>{
+      return  {
+        style: {
+          maxWidth: 100, wordBreak:'breakall' , whiteSpace: 'prewrap', wordWrap:'breakword'
+        }
+      }
+    }, 
+  },
+  {
+    title: '正确答案',
+    dataIndex: 'correct_answer',
+    width:'10%',
+    onCell: ()=>{
+      return  {
+        style: {
+          maxWidth: 60, wordBreak:'breakall' , whiteSpace: 'prewrap', wordWrap:'breakword'
+        }
+      }
+    }, 
+  },
+  {
+    title: '分数',
+    dataIndex: 'value',
+    width:'10%',
+    onCell: ()=>{
+      return  {
+        style: {
+          maxWidth: 60, wordBreak:'breakall' , whiteSpace: 'prewrap', wordWrap:'breakword'
+        }
+      }
+    }, 
+  },
+];
+let datasource=[];
 
 class TeacherCenter extends React.Component {
+  constructor(props){
+    super(props);
+    let k=0;
+  axios
+    .get('http://127.0.0.1:8000/show_choose_questionbyid/',
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+      console.log(res.data);
+      for(let i=0;i<res.data.length;i++){
+        datasource.push({
+          key:i,
+          id:res.data[i].choose_id,
+          type:'选择',
+          stem:res.data[i].stem,
+          optionA:res.data[i]['optionA'],
+          optionB:res.data[i].optionB,
+          optionC:res.data[i].optionC,
+          optionD:res.data[i].optionD,
+          correct_answer:res.data[i].correct_answer,
+          value:res.data[i].value,
+        })
+        k=i;
+      }
+    })
+
+    axios
+    .get('http://127.0.0.1:8000/show_judge_questionbyid/',
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+      console.log(res.data);
+      for(let i=0;i<res.data.length;i++){
+        datasource.push({
+          key:i+k+1,
+          id:res.data[i].judge_id,
+          type:'判断',
+          stem:res.data[i].stem,
+          optionA:'/',
+          optionB:'/',
+          optionC:'/',
+          optionD:'/',
+          correct_answer:res.data[i].correct_answer,
+          value:res.data[i].value,
+        })
+      }
+    })
+  }
   state = {
-    selectedRowKeys: []
+    selectedRowKeys: [],
+    tempselect:[],
+    IsaddquestionVisible:false,
+    IsaddquestionVisible2:false,
+    IsGenerate: false,
+    fileList: [],
+    uploading: false
+  };
+  // todo: fill route
+  search=(value)=>{
+    axios.get(
+      'http://127.0.0.1:8000/'
+    )
+  }
+  undatechange=()=>{
+    axios
+    .get('http://127.0.0.1:8000/show_choose_questionbyid/',
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+      console.log(res.data);
+      for(let i=0;i<res.data.length-1;i++){
+        datasource.push({
+          key:i,
+          id:res.data[i].id,
+          stem:res.data[i].stem,
+          optionA:res.data[i]['optionA'],
+          optionB:res.data[i].optionB,
+          optionC:res.data[i].optionC,
+          optionD:res.data[i].optionD,
+          correct_answer:res.data[i].correct_answer
+        })
+      }
+    })
+  }
+  showModal = () => {
+    this.setState({IsaddquestionVisible:true});
+  };
+  showModal2 = () => {
+    this.setState({IsaddquestionVisible2:true});
+  };
+  showModal3 = () => {
+    this.setState({IsGenerate: true})
+  }
+  showModal4 = () => {
+    this.setState({
+      IsScaleAdd: true
+    })
+  }
+  handleCancel=()=>{
+    this.setState({IsaddquestionVisible:false});
+  }
+  handleCancel2=()=>{
+    this.setState({IsaddquestionVisible2:false});
+  };
+  handleCancle3=()=>{
+    this.setState({IsGenerate: false});
+  };
+  handleCancel4 = ()=> {
+    this.setState({IsScaleAdd: false});
+  };
+  handleok=()=>{
+    this.setState({IsaddquestionVisible:false});
+  };
+  handleok2=()=>{
+    this.setState({IsaddquestionVisible2:false});
+  };
+  handleGenerate=()=>{
+    this.setState({IsGenerate: false});
+  };
+  handleFileChange = ({file, fileList}) => { //处理文件change，保证用户选择的文件只有一个
+    this.setState({
+        'fileList': fileList.length? [fileList[fileList.length - 1]] : []
+    })
+  }
+
+  changetempselect=(tt)=>{
+    console.log(1);
+    this.setState({tempselect:tt})
   };
   selectRow = (record) => {
     const selectedRowKeys = [...this.state.selectedRowKeys];
@@ -215,27 +291,210 @@ class TeacherCenter extends React.Component {
   onSelectedRowKeysChange = (selectedRowKeys) => {
     this.setState({ selectedRowKeys });
   };
-  
-  QBContent = () =>{
-      <Tabs defaultActiveKey="1" onChange={callback}>
-      <TabPane tab="Tab 1" key="1">
-        Content of Tab Pane 1
-      </TabPane>
-      <TabPane tab="Tab 2" key="2">
-        Content of Tab Pane 2
-      </TabPane>
-      <TabPane tab="Tab 3" key="3">
-        Content of Tab Pane 3
-      </TabPane>
-      </Tabs>
-  };
-  
+  addchooseques=(values)=>{
+    this.handleok();
+    this.state.tempadd='Max-cut problem: ';
+    axios
+    .get('http://127.0.0.1:8000/add_choose_question/97/'+values['courseid']+'/'+values['teacherid']+'/'+values['type']+'/'+values['stem']+'/'+values['value']+'/'+values['selectA']+'/'+values['selectB']+'/'+values['selectC']+'/'+values['selectD']+'/'+values['correctans'],
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+      console.log(res.data);
+      
+      this.setState(
+        {
+          tempst:res.data,
+          count: this.state.count + 1
+        },
+      )
+    })
+  }
+
+  deletechoose=(id)=>{
+    axios
+    .get('http://127.0.0.1:8000/delete_choose_question/'+id,
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+      console.log(res.data)
+      
+    })
+  }
+  deletejudge=(id)=>{
+    axios
+    .get('http://127.0.0.1:8000/delete_judge_question/'+id,
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+      console.log(res.data)
+      
+    })
+  }
+  deleteques=(tt)=>{
+    console.log(1);
+    console.log(tt);
+    if(tt){
+
+      console.log(2);
+      for(let i=0;i<tt.length;i++){
+        for(let j=0;j<datasource.length;j++){
+          if(tt[i]==datasource[j].key){
+            if(datasource[j].type=='选择'){
+              console.log(datasource[j]);
+              this.deletechoose(datasource[j].id);
+            }
+            else{
+              this.deletejudge(datasource[j].id);
+            }
+          }
+        }
+      }
+    }
+  }
+  addjudgeques=(values)=>{
+    this.handleok();
+    this.state.tempadd='Max-cut problem: ';
+    axios
+    .get('http://127.0.0.1:8000/add_judge_question/97/'+values['courseid']+'/'+values['teacherid']+'/'+values['type']+'/'+values['stem']+'/'+values['value']+'/'+values['correctans'],
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+      }
+    ).then((res)=>{
+      console.log(res.data);
+      
+      this.setState(
+        {
+          tempst:res.data,
+          count: this.state.count + 1
+        },
+      )
+    })
+
+
+  }
+  addpaper=(values)=>{
+    console.log(values);
+    let summark=0;
+    let id=0;
+    if(this.state.tempselect)
+    for(let i=0;i<this.state.tempselect.length;i++){
+      for(let j=0;j<datasource.length;j++){
+        if(this.state.tempselect[i]==datasource[j].key){
+          summark=summark+datasource[j].value;
+        }
+      }
+    }
+
+    axios
+    .get('http://127.0.0.1:8000/add_test_paper/1/'+values['paper_name']+'/'+values['course_id']+'/'+values['teacher_id']+'/'+summark,
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+      console.log(res.data);
+      id=res.data[0]['max(paper_id)'];
+    })
+
+    if(this.state.tempselect)
+    for(let i=0;i<this.state.tempselect.length;i++){
+      for(let j=0;j<datasource.length;j++){
+        if(this.state.tempselect[i]==datasource[j].key){
+          if(datasource[j].type=='选择'){
+            axios
+            .get('http://127.0.0.1:8000/add_test_paper_choose_question/'+id+'/'+datasource[j].id,
+              { 
+                headers:{'content-type':'application/x-www-form-urlencoded'},
+
+              }
+            ).then((res)=>{
+              console.log(res.data);
+            })
+          }
+          else{
+            axios
+            .get('http://127.0.0.1:8000/add_test_paper_judge_question/'+id+'/'+datasource[j].id,
+              { 
+                headers:{'content-type':'application/x-www-form-urlencoded'},
+
+              }
+            ).then((res)=>{
+              console.log(res.data);
+            })
+          }
+        }
+      }
+    }
+
+
+
+  }
+  generatePaperRandomly=(values)=>{
+    let url_params = values['paper_name'] + '/' + values['course_id'] + '/' + values['teacher_id'] +
+          '/' + values['choose_num'] + '/' + values['judge_num'];
+    axios.get(
+      'http:127.0.0.1:8000/generatePaper/' + url_params, 
+      {
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+      }
+    ).then ((res)=>{
+      this.setState({
+        IsGenerate: false
+      })
+      if (!res.data) {
+        message.success('试卷生成成功，编号为' + res.data);
+      } else {
+        message.warning('抱歉，当前题库内题目不足，请减少题量或增加试卷');
+      }
+    }).throw((err)=>{
+      alert(err);
+    })
+  }
+  // todo: 修改 
+  ScaleAdd=(file)=>{
+    if(!this.state.fileList.length) {
+      message.error("请选择要上传的文件")
+    }
+
+    const formData = new FormData()
+    formData.append('file', file.originFileObj)
+    this.setState({
+        uploading: true
+    })
+     
+    axios({
+        method: 'get',
+        url: 'http://127.0.0.1:8000/Selecttableset/' + formData,
+        headers: { "Content-Type": "multipart/form-data"},
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+        headers:('Access-Control-Allow-Headers:Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild,origin')
+    }).then(({data}) => {
+        message.success("上传成功")
+        console.log(data)
+    }).catch((err) =>{
+        message.error(err)
+    }).finally(() =>{
+        this.setState({
+            uploading: false,
+            IsScaleAdd: false
+        })
+    })
+  }
+
+
   render() {
     const { selectedRowKeys } = this.state;
     const rowSelection = {
-        selectedRowKeys,
+       selectedRowKeys,
+       
         onChange: this.onSelectedRowKeysChange
-      };
+    };
     return (
       
       <Layout>
@@ -276,32 +535,211 @@ class TeacherCenter extends React.Component {
           <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
           
             <div>
-              <Tabs defaultActiveKey="1" onChange={callback}>
-                  <TabPane tab="题库管理" key="1" id="QB_view">
+              
                     <div style={{margin:'0 0 15px 0'}}>
-                        <Search onSearch={search} name="subject" enterButton style={{ margin: '0 30px 0 0', width: '30%'}}></Search>
-                        <Button type="primary" style={{margin: '0 30px 0 0'}}><Link to="/testcenter_tea/testpaperResult">生成试卷</Link></Button>
-                        <Button type="primary" style={{margin: '0 30px 0 0'}}>自动生成试卷</Button>
-                        <Button type="primary" style={{margin: '0 30px 0 0'}}>添加题目</Button>
-                        <Button type="primary" style={{margin: '0 30px 0 0'}} danger>删除</Button>
+                        <Search onSearch={this.search} name="subject" enterButton style={{ margin: '0 30px 0 0', width: '30%'}}></Search>
+                        <Button onClick={this.showModal2} type="primary"  style={{margin: '0 30px 0 0'}}>生成试卷</Button>
+                        <Modal title="生成试卷" visible={this.state.IsaddquestionVisible2}  onOk={this.handleok2} onCancel={this.handleCancel2} footer={null}>
+
+                        <Form
+                          labelCol={{
+                            span: 30,
+                          }}
+                          wrapperCol={{
+                            span: 30,
+                          }}
+                          layout="horizontal"
+                          onFinish={this.addpaper}
+                        >
+                          <Form.Item label="试卷名" name="paper_name" disabled>
+                          
+                          <TextArea
+                            placeholder="50字以内"
+                            autoSize={{ minRows: 1, maxRows: 2 }}
+                          />
+                          </Form.Item>
+                          <Form.Item label="">
+                            <Button htmlType="submit" onClick={()=>{this.changetempselect(selectedRowKeys)}}>确定</Button>
+                          </Form.Item>
+                        </Form>
+                        </Modal>
+
+                        <Modal title="添加题目" visible={this.state.IsaddquestionVisible} onOk={this.handleok} onCancel={this.handleCancel} footer={null}>
+
+                        <Tabs defaultActiveKey="1" onChange={callback}>
+                        <TabPane tab="选择题" key="1" id="QB_view">
+                        <Form
+                          labelCol={{
+                            span: 30,
+                          }}
+                          wrapperCol={{
+                            span: 30,
+                          }}
+                          layout="horizontal"
+                          onFinish={this.addchooseques}
+                        >
+                          <Form.Item label="所属章节" name="type" disabled>
+                          
+                          <TextArea
+                            placeholder="50字以内"
+                            autoSize={{ minRows: 1, maxRows: 2 }}
+                          />
+                          </Form.Item>
+                          <Form.Item label="题干" name="stem" disabled>
+                          
+                          <TextArea
+                            placeholder="500字以内"
+                            autoSize={{ minRows: 3, maxRows: 6 }}
+                          />
+                          </Form.Item>
+                          <Form.Item label="选项A" name="selectA">
+                          <TextArea
+                            placeholder="200字以内"
+                            autoSize={{ minRows: 2, maxRows: 4 }}
+                          />
+                          </Form.Item>
+                          <Form.Item label="选项B" name="selectB">
+                          <TextArea
+                            placeholder="200字以内"
+                            autoSize={{ minRows: 2, maxRows: 4 }}
+                          />
+                          </Form.Item>
+                          <Form.Item label="选项C" name="selectC">
+                          <TextArea
+                            placeholder="200字以内"
+                            autoSize={{ minRows: 2, maxRows: 4 }}
+                          />
+                          </Form.Item>
+                          <Form.Item label="选项D" name="selectD">
+                          <TextArea
+                            placeholder="200字以内"
+                            autoSize={{ minRows: 2, maxRows: 4 }}
+                          />
+                          </Form.Item>
+                          <Form.Item label="分数" name="value">
+                          <InputNumber min={0} max={10} defaultValue={0}/>
+                          </Form.Item>
+                          <Form.Item label="正确选项" name="correctans">
+                            <Radio.Group onChange={this.handleanswer} value={this.state.answer} >
+                              <Radio value="A">A</Radio>
+                              <Radio value="B">B</Radio>
+                              <Radio value="C">C</Radio>
+                              <Radio value="D">D</Radio>
+                            </Radio.Group>
+                          </Form.Item>
+                          <Form.Item label="">
+                            <Button htmlType="submit" >确定</Button>
+                          </Form.Item>
+                        </Form>
+                        </TabPane>
+
+                        <TabPane tab="判断题" key="2" id="QB_w">
+                        <Form
+                          labelCol={{
+                            span: 30,
+                          }}
+                          wrapperCol={{
+                            span: 30,
+                          }}
+                          layout="horizontal"
+                          onFinish={this.addjudgeques}
+                        >
+                          <Form.Item label="所属章节" name="type" disabled>
+                          
+                          <TextArea
+                            placeholder="50字以内"
+                            autoSize={{ minRows: 1, maxRows: 2 }}
+                          />
+                          </Form.Item>
+                          <Form.Item label="题干" name="stem" disabled>
+                          
+                          <TextArea
+                            placeholder="500字以内"
+                            autoSize={{ minRows: 3, maxRows: 6 }}
+                          />
+                          </Form.Item>
+                          <Form.Item label="分数" name="value">
+                          <InputNumber min={0} max={10} defaultValue={0}/>
+                          </Form.Item>
+                          <Form.Item label="正确选项" name="correctans">
+                            <Radio.Group onChange={this.handleanswer} value={this.state.answer} >
+                              <Radio value="T">T</Radio>
+                              <Radio value="F">F</Radio>
+                            </Radio.Group>
+                          </Form.Item>
+                          <Form.Item >
+                            <Button htmlType="submit"  >确定</Button>
+                          </Form.Item>
+                        </Form>
+                        </TabPane>
+                        </Tabs>
+                        </Modal>
+                        <Modal 
+                          title="自动生成试卷" visible={this.state.IsGenerate}
+                          onOk={this.handleGenerate} onCancel={this.handleCancle3} footer={null}
+                        >
+                          <Form onFinish={this.generatePaperRandomly}>
+                            <Form.Item name='paper_name' label="试卷名称" style={{width: '80%'}}>
+                              <Input placeholder="请输入试卷名称"></Input>
+                            </Form.Item>
+                            <Form.Item name='course_id' label="课程编号" style={{width: '80%'}}>
+                              <Input placeholder="请输入课程编号"></Input>
+                            </Form.Item>
+                            <Form.Item name='teacher_id' label="教师编号" style={{width: '80%'}}>
+                              <Input placeholder='请输入教师编号'></Input>
+                            </Form.Item>
+                            <Form.Item name='choose_num' label='选择题数' style={{width: '80%'}}>
+                              <InputNumber placeholder='请输入判断题数目'></InputNumber>
+                            </Form.Item>
+                            <Form.Item name='judge_num' label='判断题数' style={{width: '80%'}}>
+                              <InputNumber placeholder='请输入选择题数目'></InputNumber>
+                            </Form.Item>
+
+                            <Form.Item style={{margin: '0 43% 0 43%'}} label=''>
+                              <Button htmlType='submit' type="primary" onClick={this.generatePaperRandomly}>确定</Button>
+                            </Form.Item>
+                          </Form>
+
+                        </Modal>
+                        <Modal
+                          title="批量导入题目" visible={this.state.IsScaleAdd} 
+                          onCancel={this.handleCancel4} footer={null}
+                        >
+                          <Form onFinish={this.ScaleAdd} >
+                            <Form.Item name='file'>
+                              <Dragger {...props_upload} fileList={this.state.fileList} 
+                                beforeUpload={(f, fList) => false} onChange={this.handleFileChange}>
+                                  <p className="ant-upload-drag-icon">
+                                    <InboxOutlined />
+                                  </p>
+                                  <p className="ant-upload-text">点击或拖拽文件上传</p>
+                                  <p className="ant-upload-hint">
+                                    请上传.txt格式文件
+                                  </p>
+                              </Dragger>
+                            </Form.Item>
+                            <Form.Item style={{margin: '0 40% 0 40%'}}>
+                              <Button htmlType='submit' type='primary'>确定</Button>
+                            </Form.Item>
+                          </Form>
+
+                        </Modal>
+                        
+                        <Button type="primary" style={{margin: '0 30px 0 0'}} onClick={this.showModal3}>自动生成试卷</Button>
+                        <Button type="primary" onClick={this.showModal} style={{margin: '0 30px 0 0'}}>添加题目</Button>
+                        <Button type="primary" onClick={this.showModal4} style={{margin: '0 30px 0 0'}}>批量导入题目</Button>
+                        <Button type="primary" onClick={() => { this.deleteques(selectedRowKeys) }} style={{margin: '0 30px 0 0'}} danger>删除</Button>
                     </div>
                     <div id="testing"></div>
                     <div id="QB_content">
-                      <Table rowSelection={rowSelection} columns={columns} dataSource={data}
+                      <Table rowSelection={rowSelection} columns={columns} dataSource={datasource}
                         onRow={(record) => ({
                           onClick: () => {
                             this.selectRow(record);}
                         })}>
                       </Table>
                     </div>
-                  </TabPane>
-                  <TabPane tab="试卷管理" key="2">
-                    Content of Tab Pane 2
-                  </TabPane>
-                  <TabPane tab="考试管理" key="3">
-                    Content of Tab Pane 3
-                  </TabPane>
-              </Tabs>
+                  
             </div>
           </Content>
           <Footer style={{ textAlign: 'center' }}>EMS ©2021 Created by SE Group 4</Footer>
