@@ -20,26 +20,6 @@ function callback(key) {
 }
 
 
-const props_upload = {
-  name: 'file',
-  multiple: true,
-  action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-  onChange(info) {
-    const { status } = info.file;
-    if (status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (status === 'done') {
-      message.success(`${info.file.name} 文件上传成功`);
-    } else if (status === 'error') {
-      message.error(`${info.file.name} 文件上传失败`);
-    }
-  },
-  onDrop(e) {
-    console.log('Dropped files', e.dataTransfer.files);
-  },
-};
-
 
 const columns = [
   {
@@ -139,7 +119,7 @@ const columns = [
         }
       }
     }, 
-  },
+  }
 ];
 let datasource=[];
 
@@ -203,13 +183,26 @@ class TeacherCenter extends React.Component {
     IsaddquestionVisible2:false,
     IsGenerate: false,
     fileList: [],
-    uploading: false
+    uploading: false,
+    IsEditJudge: false,
+    IsEditChoose: false,
+    old_stem: null,
+    old_val: 0,
+    judge_old_answer: 1,
+    choose_old_answer: 1,
+    old_optionA: null,
+    old_optionB: null,
+    old_optionC:null,
+    old_optionD: null,
+    eidt_id: 0
   };
   // todo: fill route
   search=(value)=>{
     axios.get(
-      'http://127.0.0.1:8000/'
-    )
+      'http://127.0.0.1:8000/search/' + value,{headers:{'content-type':'application/x-www-form-urlencoded'},}
+    ).then((res)=>{
+
+    })
   }
   undatechange=()=>{
     axios
@@ -247,7 +240,64 @@ class TeacherCenter extends React.Component {
     this.setState({
       IsScaleAdd: true
     })
+  };
+  showEdit = () => {
+    if ( this.state.tempselect.length == 1) {
+      for(let j=0; j < datasource.length; j++){
+        if(this.state.tempselect[0] == datasource[j].key){
+          if (datasource[j].type='判断') {
+            this.setState({
+              old_stem: datasource[j].stem,
+              old_val: datasource[j].value,
+              old_answer: datasource[j].correct_answer,
+              edit_id: datasource[j].id,
+              IsEditJudge: true,
+            })
+          } else {
+            this.setState({
+              old_stem: datasource[j].stem,
+              old_val: datasource[j].value,
+              old_answer: datasource[j].correct_answer,
+              optionA: datasource[j].optionA,
+              optionB: datasource[j].optionB,
+              optionC: datasource[j].optionC,
+              optionD: datasource[j].optionD,
+              edit_id: datasource[j].id,
+              IsEditChoose: true
+            })
+          }
+        }
+      }
+    } else if (!this.state.tempselect.length ){
+      message.warning('请先选中一道题');
+    } else if (this.state.tempselect.length > 1) {
+      message.warning('编辑状态只允许选中一道题');
+    }
   }
+
+  EditJudge=(values)=> {
+    let url_params = this.state.eidt_id+'/'+values['stem']+'/'+values['value']+'/'+values['correctans'];
+    axios.get('http://127.0.0.1:8000/edit/judge/'+url_params, 
+    {headers: {'content-type':'application/x-www-form-urlencoded'}}
+    ).then((res)=>{
+      this.setState({
+        IsEditJudge: false,
+      })
+    })
+    message.succeed('题目修改成功');
+  }
+  EditChoose=(values)=> {
+    let url_params = this.state.eidt_id+'/'+values['stem']+'/'+values['value']+'/'+values['selectA']+'/'+values['selectB']+'/'+values['selectC']+'/'+values['selectD']+'/'+values['correctans'];
+    axios.get('http://127.0.0.1:8000/edit/choose/'+url_params, 
+    {headers: {'content-type':'application/x-www-form-urlencoded'}}
+    ).then((res)=>{
+      this.setState({
+        IsEditChoose: false,
+      })
+    })
+    message.success('题目修改成功');
+  }
+
   handleCancel=()=>{
     this.setState({IsaddquestionVisible:false});
   }
@@ -260,6 +310,16 @@ class TeacherCenter extends React.Component {
   handleCancel4 = ()=> {
     this.setState({IsScaleAdd: false});
   };
+  handleCancleEditJudge = () =>{
+    this.setState({
+      IsEditJudge: false
+    })
+  };
+  handleCancleEditChoose = () => {
+    this.setState({
+      IsEditChoose: false
+    })
+  }
   handleok=()=>{
     this.setState({IsaddquestionVisible:false});
   };
@@ -375,8 +435,6 @@ class TeacherCenter extends React.Component {
         },
       )
     })
-
-
   }
   addpaper=(values)=>{
     console.log(values);
@@ -422,7 +480,6 @@ class TeacherCenter extends React.Component {
             .get('http://127.0.0.1:8000/add_test_paper_judge_question/'+id+'/'+datasource[j].id,
               { 
                 headers:{'content-type':'application/x-www-form-urlencoded'},
-
               }
             ).then((res)=>{
               console.log(res.data);
@@ -701,13 +758,6 @@ class TeacherCenter extends React.Component {
                           layout="horizontal"
                           onFinish={this.addjudgeques}
                         >
-                          <Form.Item label="所属章节" name="type" disabled>
-                          
-                          <TextArea
-                            placeholder="50字以内"
-                            autoSize={{ minRows: 1, maxRows: 2 }}
-                          />
-                          </Form.Item>
                           <Form.Item label="题干" name="stem" disabled>
                           
                           <TextArea
@@ -789,10 +839,85 @@ class TeacherCenter extends React.Component {
  
 
                         </Modal>
-                        
+                        <Modal visible={this.state.IsEditJudge} onCancel={this.handleCancleEditJudge} footer={null}>
+                          <Form onFinish={this.EditJudge}>
+                            <Form.Item name='stem'>
+                            <Form
+                              labelCol={{span: 30,}} wrapperCol={{span: 30,}}
+                              layout="horizontal" onFinish={this.addjudgeques}>
+                              <Form.Item label="题干" name="stem" disabled>
+                              <TextArea
+                                placeholder="500字以内" autoSize={{ minRows: 3, maxRows: 6 }}>
+                                  {this.state.old_stem}
+                                </TextArea>
+                              </Form.Item>
+                              <Form.Item label="分数" name="value">
+                                <InputNumber min={0} max={10} defaultValue={this.state.old_val}/>
+                              </Form.Item>
+                              <Form.Item label="正确选项" name="correctans">
+                                <Radio.Group onChange={this.handleanswer} value={this.state.old_answer} >
+                                  <Radio value="T">T</Radio>
+                                  <Radio value="F">F</Radio>
+                                </Radio.Group>
+                              </Form.Item>
+                              <Form.Item >
+                                <Button htmlType="submit">确定</Button>
+                              </Form.Item>
+                            </Form>
+                            </Form.Item>
+                          </Form>
+                        </Modal>
+                        <Modal visible={this.state.IsEditChoose} onCancel={this.handleCancleEditChoose}>
+                            <Form
+                            labelCol={{span: 30,}} wrapperCol={{span: 30,}}
+                            layout="horizontal" onFinish={this.addchooseques}>
+
+                            <Form.Item label="题干" name="stem" disabled>
+                              <TextArea placeholder="500字以内" autoSize={{ minRows: 3, maxRows: 6 }}>
+                                {this.state.old_stem}
+                              </TextArea>
+                            </Form.Item>
+                            <Form.Item label="选项A" name="selectA">
+                              <TextArea placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }}>
+                                {this.state.optionA}
+                              </TextArea>
+                            </Form.Item>
+                            <Form.Item label="选项B" name="selectB">
+                              <TextArea placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }}>
+                                {this.state.optionB}
+                              </TextArea>
+                            </Form.Item>
+                            <Form.Item label="选项C" name="selectC">
+                              <TextArea placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }}>
+                                {this.state.optionC}
+                              </TextArea>
+                            </Form.Item>
+                            <Form.Item label="选项D" name="selectD">
+                              <TextArea placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }}>
+                                {this.state.optionD}
+                              </TextArea>
+                            </Form.Item>
+                            <Form.Item label="分数" name="value">
+                            <InputNumber min={0} max={10} defaultValue={this.state.old_val}/>
+                            </Form.Item>
+                            <Form.Item label="正确选项" name="correctans">
+                              <Radio.Group onChange={this.handleanswer} value={this.state.answer} >
+                                <Radio value="A">A</Radio>
+                                <Radio value="B">B</Radio>
+                                <Radio value="C">C</Radio>
+                                <Radio value="D">D</Radio>
+                              </Radio.Group>
+                            </Form.Item>
+                            <Form.Item label="">
+                              <Button htmlType="submit" >确定</Button>
+                            </Form.Item>
+                          </Form>
+                        </Modal>
+
                         <Button type="primary" style={{margin: '0 30px 0 0'}} onClick={this.showModal3}>自动生成试卷</Button>
                         <Button type="primary" onClick={this.showModal} style={{margin: '0 30px 0 0'}}>添加题目</Button>
                         <Button type="primary" onClick={this.showModal4} style={{margin: '0 30px 0 0'}}>批量导入题目</Button>
+                        <Button type='primary' onClick={this.showEdit} style={{margin: '0 30px 0 0'}}>编辑</Button>
                         <Button type="primary" onClick={() => { this.deleteques(selectedRowKeys) }} style={{margin: '0 30px 0 0'}} danger>删除</Button>
                     </div>
                     <div id="testing"></div>
