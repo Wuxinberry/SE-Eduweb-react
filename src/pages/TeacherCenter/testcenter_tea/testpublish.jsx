@@ -79,7 +79,7 @@ class StudentCenter extends React.Component {
     // 组合url参数
     let exam_params = paper_id + "/" + course_id + "/" + teacher_id + "/" +
       start_time + "/" + end_time + "/" + state;
-    axios.get('http://127.0.0.1:8000/exam/create/'+exam_params, {
+    axios.get('http://127.0.0.1:8000/exam/create/'+ exam_params, {
       headers:{'content-type':'application/x-www-form-urlencoded'},
     }).then((res)=>{
       this.setState({

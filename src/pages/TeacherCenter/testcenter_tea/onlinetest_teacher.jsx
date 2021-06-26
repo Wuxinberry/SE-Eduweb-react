@@ -456,35 +456,92 @@ class TeacherCenter extends React.Component {
       alert(err);
     })
   }
-  // todo: 修改 
-  ScaleAdd=(file)=>{
-    if(!this.state.fileList.length) {
-      message.error("请选择要上传的文件")
+  ScaleAdd_judge=()=>{
+    var file = document.getElementById('upload_judge').files[0];
+    var reader = new FileReader();
+  //  reader.readAsArrayBuffer(file, 'utf-8');
+    reader.readAsText(file, 'utf-8');
+    reader.onload = (e)=>{
+      console.log(e);
+      console.log(reader.readyState);
+      var result = reader.result;
+      var j = 0;
+      var record = new Array();;
+      var line = [];
+      var clear = [];
+      var cnt_line = 0;
+      for ( j = 0; result[j]; j++ ) {  
+        if (result[j] == '\r') {
+          if (result[++j] == '\n') {
+            console.log(cnt_line + ":" + line);
+            record.push(line);
+            line = clear;
+            cnt_line++;
+          } else {
+            line += result[j];
+          }
+        } else {
+          line += result[j];
+        }
+        if ( cnt_line == 6 ) {
+          axios.get('http://127.0.0.1:8000/scale_add_judge/'+record[0]+'/'+record[1]+'/'+record[2]+'/'+record[3]+'/'+record[4]+'/'+record[5],
+          {
+            headers:{'content-type':'application/x-www-form-urlencoded'},
+          }).then((res)=>{
+            console.log(res.data);
+            this.setState({
+                tempst:res.data,
+            })
+          })
+          cnt_line = 0;
+        }
+      }
+      message.success('文件读取成功');
     }
+  }
 
-    const formData = new FormData()
-    formData.append('file', file.originFileObj)
-    this.setState({
-        uploading: true
-    })
-     
-    axios({
-        method: 'get',
-        url: 'http://127.0.0.1:8000/Selecttableset/' + formData,
-        headers: { "Content-Type": "multipart/form-data"},
-        headers:{'content-type':'application/x-www-form-urlencoded'},
-        headers:('Access-Control-Allow-Headers:Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild,origin')
-    }).then(({data}) => {
-        message.success("上传成功")
-        console.log(data)
-    }).catch((err) =>{
-        message.error(err)
-    }).finally(() =>{
-        this.setState({
-            uploading: false,
-            IsScaleAdd: false
-        })
-    })
+  ScaleAdd_choose=()=>{
+    var file = document.getElementById('upload_choose').files[0];
+    var reader = new FileReader();
+  //  reader.readAsArrayBuffer(file, 'utf-8');
+    reader.readAsText(file, 'utf-8');
+    reader.onload = (e)=>{
+      console.log(e);
+      console.log(reader.readyState);
+      var result = reader.result;
+      var j = 0;
+      var record = new Array();;
+      var line = [];
+      var clear = [];
+      var cnt_line = 0;
+      for ( j = 0; result[j]; j++ ) {  
+        if (result[j] == '\r') {
+          if (result[++j] == '\n') {
+            console.log(cnt_line + ":" + line);
+            record.push(line);
+            line = clear;
+            cnt_line++;
+          } else {
+            line += result[j];
+          }
+        } else {
+          line += result[j];
+        }
+        if ( cnt_line == 10 ) {
+          axios.get('http://127.0.0.1:8000/scale_add_choose/'+record[0]+'/'+record[1]+'/'+record[2]+'/'+record[3]+'/'+record[4]+'/'+record[5]+'/'+record[6]+'/'+record[7]+'/'+record[8]+'/'+record[9],
+          {
+            headers:{'content-type':'application/x-www-form-urlencoded'},
+          }).then((res)=>{
+            console.log(res.data);
+            this.setState({
+                tempst:res.data,
+            })
+          })
+          cnt_line = 0;
+        }
+      }
+      message.success('文件读取成功');
+    }
   }
 
 
@@ -705,23 +762,31 @@ class TeacherCenter extends React.Component {
                           title="批量导入题目" visible={this.state.IsScaleAdd} 
                           onCancel={this.handleCancel4} footer={null}
                         >
-                          <Form onFinish={this.ScaleAdd} >
-                            <Form.Item name='file'>
-                              <Dragger {...props_upload} fileList={this.state.fileList} 
-                                beforeUpload={(f, fList) => false} onChange={this.handleFileChange}>
-                                  <p className="ant-upload-drag-icon">
-                                    <InboxOutlined />
-                                  </p>
-                                  <p className="ant-upload-text">点击或拖拽文件上传</p>
-                                  <p className="ant-upload-hint">
-                                    请上传.txt格式文件
-                                  </p>
-                              </Dragger>
-                            </Form.Item>
-                            <Form.Item style={{margin: '0 40% 0 40%'}}>
-                              <Button htmlType='submit' type='primary'>确定</Button>
-                            </Form.Item>
-                          </Form>
+                          <Tabs defaultActiveKey='1'>
+                            <TabPane tab='判断题' id='tab_upload_judge' key='1' >
+                            <Form onFinish={this.ScaleAdd_judge} >
+                              <Form.Item name='file'>
+                                <Input type='file' onClick='ScaleAdd_judge' id='upload_judge'
+                                placeholder='请上传判断题文件'></Input>
+                              </Form.Item>
+                              <Form.Item style={{margin: '0 40% 0 40%'}}>
+                                <Button htmlType='submit' type='primary'>确定</Button>
+                              </Form.Item>
+                              </Form>
+                            </TabPane>
+                            <TabPane tab='选择题' key='2' id='tab_upload_choose'>
+                            <Form onFinish={this.ScaleAdd_choose} >
+                              <Form.Item name='file'>
+                                <Input type='file' onClick='ScaleAdd_choose' id='upload_choose'
+                                placeholder='请上传选择题文件'></Input>
+                              </Form.Item>
+                              <Form.Item style={{margin: '0 40% 0 40%'}}>
+                                <Button htmlType='submit' type='primary'>确定</Button>
+                              </Form.Item>
+                              </Form>
+                            </TabPane>
+                          </Tabs>
+ 
 
                         </Modal>
                         
