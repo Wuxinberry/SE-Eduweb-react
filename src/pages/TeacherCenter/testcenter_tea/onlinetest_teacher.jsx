@@ -242,7 +242,7 @@ class TeacherCenter extends React.Component {
     })
   };
   showEdit = () => {
-    if ( this.state.tempselect.length == 1) {
+    if ( this.state.selectedRowKeys.length == 1) {
       for(let j=0; j < datasource.length; j++){
         if(this.state.tempselect[0] == datasource[j].key){
           if (datasource[j].type='判断') {
@@ -268,9 +268,9 @@ class TeacherCenter extends React.Component {
           }
         }
       }
-    } else if (!this.state.tempselect.length ){
+    } else if (!this.state.selectedRowKeys.length ){
       message.warning('请先选中一道题');
-    } else if (this.state.tempselect.length > 1) {
+    } else if (this.state.selectedRowKeys.length > 1) {
       message.warning('编辑状态只允许选中一道题');
     }
   }
@@ -621,8 +621,8 @@ class TeacherCenter extends React.Component {
           }}
         >
           <div className="logo" />
-          <Menu theme="dark" mode="inline" defaultSelectedKeys={['3']}>
-            <Menu.Item key="1" icon={<LeftOutlined />}>
+          <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
+          <Menu.Item key="1" icon={<LeftOutlined />}>
             <Link to="/TeacherCenter">
               返回
             </Link>
@@ -632,7 +632,12 @@ class TeacherCenter extends React.Component {
               试卷管理
             </Link>
           </Menu.Item>
-            <Menu.Item key="3" icon={<UnorderedListOutlined />}>
+          <Menu.Item key="3" icon={<CopyOutlined />}>
+            <Link to="/testcenter_tea/testexam">
+              考试管理
+            </Link>
+          </Menu.Item>
+            <Menu.Item key="4" icon={<UnorderedListOutlined />}>
             <Link to="/testcenter_tea/quesmanager">
               题库管理
             </Link>

@@ -45,7 +45,7 @@ function bac(){
   console.log(123);
   if(datasource.length==0)
   axios
-    .get('http://127.0.0.1:8000/show_test_paperbytid/2190100555',
+    .get('http://127.0.0.1:8000/examtea/query/2190100555',
       { 
         headers:{'content-type':'application/x-www-form-urlencoded'},
 
@@ -53,15 +53,26 @@ function bac(){
     ).then((res)=>{
       let texamid=res.data;
       for(let i=0;i<=texamid.length-1;i++){
-        datasource.push({
-          tid:i,
-          paper_id:texamid[i]['paper_id'],
-          teacher_id:texamid[i]['teacher_id'],
-          course_id:texamid[i]['course_id'],
-          paper_name:texamid[i]['paper_name']
-        })
-          
-        
+        axios
+        .get('http://127.0.0.1:8000/show_test_paperbyid/'+texamid[i]['paper_id'],
+          { 
+            headers:{'content-type':'application/x-www-form-urlencoded'},
+    
+          }
+        ).then((res)=>{
+            console.log(res.data);
+            datasource.push({
+                tid:i,
+                paper_name:res.data[0]['paper_name'],
+                paper_id:texamid[i]['paper_id'],
+                exam_id:texamid[i]['exam_id'],
+                course_id:texamid[i]['course_id'],
+                state:texamid[i]['state'],
+                starttime:texamid[i]['start_time'],
+                endtime:texamid[i]['end_time'],
+              })
+              console.log(datasource);
+        });       
       }
       return 1;
     })
@@ -77,8 +88,8 @@ class StudentCenter extends React.Component {
         dataIndex: 'tid',
         width:'100%',
         render:text=>
-        <Card title={<div><DesktopOutlined />  {datasource[text]['paper_id']} {datasource[text]['paper_name']}</div>}  style={{ marginRight: 0,marginLeft: 0 }}>
-                  <div class='row1'> <div style={{ textAlign:'right'}}><ReadOutlined /> {datasource[text]['course_id']}  &nbsp;&nbsp;&nbsp; <IdcardOutlined />{datasource[text]['teacher_id']}</div></div>
+        <Card title={<div><DesktopOutlined />  <Link to={"/testcenter_tea/testpaper1/"+datasource[text]['exam_id']}>{datasource[text]['paper_name']}</Link></div>} extra={<div><Tag color="blue">{datasource[text]['state']}</Tag></div>} style={{ marginRight: 0,marginLeft: 0 }}>
+                  <div class='row1'><div>开始时间：{datasource[text]['starttime']}</div> <div>结束时间：{datasource[text]['endtime']}</div></div>
         </Card>
       },
     ],
@@ -100,35 +111,6 @@ class StudentCenter extends React.Component {
     console.log('click ', e);
     this.setState({ current: e.key });
   };
-
-  // * 创建考试
-  exam_create=values=> {
-    console.log(values);
-    let exam_date = values['exam_date'].format('YYYY-MM-DD');
-    let exam_start_time=values['exam_time_range'][0].format('HH:mm:ss');
-    let exam_end_time = values['exam_time_range'][1].format('HH:mm:ss');
-    let paper_id = values['paper_id'];
-    let course_id = values['course_id'];
-    let teacher_id = values['teacher_id'];
-    // 拼接考试时间
-    let start_time = exam_date + " " + exam_start_time;
-    let end_time = exam_date + " " + exam_end_time;
-    let state = exam_state_judge(start_time, end_time);
-    // 组合url参数
-    let exam_params = paper_id + "/" + course_id + "/" + teacher_id + "/" +
-      start_time + "/" + end_time + "/" + state;
-    axios.get('http://127.0.0.1:8000/exam/create/'+exam_params, {
-      headers:{'content-type':'application/x-www-form-urlencoded'},
-    }).then((res)=>{
-      this.setState({
-        visible: false,
-      });
-    }).catch((err)=>{
-      alert(err)
-    })
-  }
-
-
   render() {
     const { current } = this.state;
     return (
@@ -142,7 +124,7 @@ class StudentCenter extends React.Component {
           }}
         >
           <div className="logo" />
-          <Menu theme="dark" mode="inline" defaultSelectedKeys={['2']}>
+          <Menu theme="dark" mode="inline" defaultSelectedKeys={['3']}>
             <Menu.Item key="1" icon={<LeftOutlined />}>
             <Link to="/TeacherCenter">
               返回
@@ -169,42 +151,10 @@ class StudentCenter extends React.Component {
 
         <Layout className="site-layout" style={{ marginLeft: 200 }}>
           <Header className="site-layout-background" style={{ padding: 0 }} >
-            <span style={{ color: '#fff', fontSize: '1.4em', marginLeft: 20 }}>试题管理</span>
+            <span style={{ color: '#fff', fontSize: '1.4em', marginLeft: 20 }}>考试管理</span>
           </Header>
           <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
             
-              
-              
-                
-                <Button type="primary" style={{marginLeft:20}} onClick={this.showModal}>
-                  <DiffOutlined />新建考试<Link to="/testcenter_tea/testpaperResult"></Link>
-                  </Button>
-                <Modal
-                  title="考试信息" visible={this.state.visible}
-                  onOk={this.hideModal} onCancel={this.hideModal}
-                  footer={null}
-                >
-                  <Form style={{margin: '0 20% 0 20%'}} onFinish={this.exam_create}>
-                    <Form.Item label="试卷编号" style={{margin: '0', width:'100%'}} name="paper_id">
-                      <Input placeholder="请输入试卷编号"></Input>
-                    </Form.Item><br></br>
-                    <Form.Item label="课程编号" style={{margin: '0', width:'100%'}} name="course_id">
-                      <Input placeholder="请输入课程编号"></Input>
-                    </Form.Item><br></br>
-                    <Form.Item label="教师编号" style={{margin: '0', width:'100%'}} name="teacher_id">
-                      <Input placeholder="请输入教师编号"></Input>
-                    </Form.Item><br></br>
-                    <Form.Item label="考试日期" style={{margin: '0', width:'150%'}} name="exam_date">
-                      <DatePicker placeholder="请选择考试日期"></DatePicker>
-                    </Form.Item><br></br>
-                    <Form.Item label="考试时段" style={{margin: '0', width:'100%'}} name="exam_time_range">
-                      <TimePicker.RangePicker placeholder="请选择考试时段"></TimePicker.RangePicker>
-                    </Form.Item>
-                    <Form.Item>
-                      <Button htmlType="submit" type='primary' style={{margin: '10% 35% 0 35%'}}>确定</Button>
-                    </Form.Item>
-                  </Form>
-                </Modal>
             
             <div className="site-layout-background" style={{ padding: 24, textAlign: 'left' }}>
 

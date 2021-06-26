@@ -8,10 +8,10 @@ class testpaper extends React.Component{
     return (
       <HashRouter >
         <div>
-      <Route exact path="/testcenter_tea/testpaper1" component={testintroduce1} />
-      <Route path="/testcenter_tea/testpaper1/testquestions1" component={testquestions1} />
-      <Route path="/testcenter_tea/testpaper1/testintroduce1" component={testintroduce1} />
-      <Route path="/testcenter_tea/testpaper1/testrank1" component={testrank1} />
+      <Route exact path="/testcenter_tea/testpaper1/:pid" component={testintroduce1} />
+      <Route path="/testcenter_tea/testpaper1/testquestions1/:pid" component={testquestions1} />
+      <Route path="/testcenter_tea/testpaper1/testintroduce1/:pid" component={testintroduce1} />
+      <Route path="/testcenter_tea/testpaper1/testrank1/:pid" component={testrank1} />
       </div>
       </HashRouter>
     )

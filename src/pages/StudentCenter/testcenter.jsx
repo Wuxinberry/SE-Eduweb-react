@@ -8,7 +8,7 @@ class testcenter extends React.Component{
       <HashRouter >
         <div>
       <Route exact path="/testcenter_stu" component={onlinetest} />
-      <Route path="/testcenter_stu/testpaper" component={testpaper} />
+      <Route path="/testcenter_stu/testpaper/:eid" component={testpaper} />
       </div>
       </HashRouter>
     )
