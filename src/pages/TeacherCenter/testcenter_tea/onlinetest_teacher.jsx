@@ -336,7 +336,7 @@ class TeacherCenter extends React.Component {
         IsEditJudge: false,
       })
     })
-    message.succeed('题目修改成功');
+    message.success('题目修改成功');
   }
   EditChoose=(values)=> {
     let url_params = this.state.eidt_id+'/'+values['stem']+'/'+values['value']+'/'+values['selectA']+'/'+values['selectB']+'/'+values['selectC']+'/'+values['selectD']+'/'+values['correctans'];
@@ -902,9 +902,9 @@ class TeacherCenter extends React.Component {
                             
                     
                               <Form.Item label="题干" name="stem" disabled>
-                              <TextArea
+                              <Input rows={4}
                                 placeholder="500字以内" autoSize={{ minRows: 3, maxRows: 6 }} value={this.state.old_stem}>
-                                </TextArea>
+                                </Input>
                               </Form.Item>
                               <Form.Item label="分数" name="value">
                                 <InputNumber min={0} max={10} defaultValue={this.state.old_val}/>
@@ -919,7 +919,6 @@ class TeacherCenter extends React.Component {
                                 <Button htmlType="submit" >确定</Button>
                               </Form.Item>
                             
-                            
                           </Form>
                         </Modal>
                         <Modal visible={this.state.IsEditChoose} onCancel={this.handleCancleEditChoose}>
@@ -928,29 +927,29 @@ class TeacherCenter extends React.Component {
                             layout="horizontal" onFinish={this.EditChoose}>
 
                             <Form.Item label="题干" name="stem" disabled>
-                              <TextArea placeholder="500字以内" autoSize={{ minRows: 3, maxRows: 6 }}>
-                                {this.state.old_stem}
-                              </TextArea>
+                              <Input rows={4} placeholder="500字以内" autoSize={{ minRows: 3, maxRows: 6 }}
+                              value={this.state.old_stem}>        
+                              </Input>
                             </Form.Item>
                             <Form.Item label="选项A" name="selectA">
-                              <TextArea placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }}>
-                                {this.state.optionA}
-                              </TextArea>
+                              <Input rows={4} placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }} 
+                              value={this.state.optionA}>
+                              </Input>
                             </Form.Item>
                             <Form.Item label="选项B" name="selectB">
-                              <TextArea placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }}>
-                                {this.state.optionB}
-                              </TextArea>
+                              <Input rows={4} placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }} 
+                              value= {this.state.optionB}>
+                              </Input>
                             </Form.Item>
                             <Form.Item label="选项C" name="selectC">
-                              <TextArea placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }}>
-                                {this.state.optionC}
-                              </TextArea>
+                              <Input rows={4} placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }}
+                                value={this.state.optionC}>
+                              </Input>
                             </Form.Item>
                             <Form.Item label="选项D" name="selectD">
-                              <TextArea placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }}>
-                                {this.state.optionD}
-                              </TextArea>
+                              <Input rows={4} placeholder="200字以内" autoSize={{ minRows: 2, maxRows: 4 }}
+                              value={this.state.optionD}>
+                              </Input>
                             </Form.Item>
                             <Form.Item label="分数" name="value">
                             <InputNumber min={0} max={10} defaultValue={this.state.old_val}/>
