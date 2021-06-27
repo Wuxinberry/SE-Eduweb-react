@@ -127,6 +127,9 @@ class TeacherCenter extends React.Component {
   constructor(props){
     super(props);
     let k=0;
+  if(datasource.length==0){
+
+  
   axios
     .get('http://127.0.0.1:8000/show_choose_questionbyid/',
       { 
@@ -175,6 +178,7 @@ class TeacherCenter extends React.Component {
         })
       }
     })
+    }
   }
   state = {
     selectedRowKeys: [],
@@ -198,11 +202,52 @@ class TeacherCenter extends React.Component {
   };
   // todo: fill route
   search=(value)=>{
-    axios.get(
-      'http://127.0.0.1:8000/search/' + value,{headers:{'content-type':'application/x-www-form-urlencoded'},}
+    let k=0;
+    datasource=[];
+    axios
+    .get('http://127.0.0.1:8000/search_judge/' + value,
+       {
+         headers:{'content-type':'application/x-www-form-urlencoded'},
+       }
     ).then((res)=>{
+      for(let i=0;i<res.data.length;i++){
+        datasource.push({
+          key:i,
+          id:res.data[i].choose_id,
+          type:'选择',
+          stem:res.data[i].stem,
+          optionA:res.data[i]['optionA'],
+          optionB:res.data[i].optionB,
+          optionC:res.data[i].optionC,
+          optionD:res.data[i].optionD,
+          correct_answer:res.data[i].correct_answer,
+          value:res.data[i].value,
+        })
+        k=i;
+      }
+      this.setState({columns:this.state.columns});
+    });
 
-    })
+    axios
+    .get('http://127.0.0.1:8000/search_choose/' + value, {headers:{'content-type':'application/x-www-form-urlencoded'},}
+    ).then((res)=>{
+      for(let i=0;i<res.data.length;i++){
+        datasource.push({
+          key:i+k+1,
+          id:res.data[i].judge_id,
+          type:'判断',
+          stem:res.data[i].stem,
+          optionA:'/',
+          optionB:'/',
+          optionC:'/',
+          optionD:'/',
+          correct_answer:res.data[i].correct_answer,
+          value:res.data[i].value,
+        })
+      }
+      this.setState({columns:this.state.columns});
+    });
+
   }
   undatechange=()=>{
     axios
@@ -241,18 +286,25 @@ class TeacherCenter extends React.Component {
       IsScaleAdd: true
     })
   };
-  showEdit = () => {
-    if ( this.state.selectedRowKeys.length == 1) {
+  showEdit = (tempselect) => {
+    console.log(tempselect);
+    console.log(datasource);
+    if ( tempselect.length == 1) {
       for(let j=0; j < datasource.length; j++){
-        if(this.state.tempselect[0] == datasource[j].key){
-          if (datasource[j].type='判断') {
-            this.setState({
-              old_stem: datasource[j].stem,
-              old_val: datasource[j].value,
-              old_answer: datasource[j].correct_answer,
-              edit_id: datasource[j].id,
-              IsEditJudge: true,
-            })
+        if(tempselect[0] == datasource[j].key){
+          if (datasource[j].type=='判断') {
+            console.log(datasource[j]);
+            
+             this.state.old_stem= datasource[j]['stem'];
+             this.state.old_val= datasource[j].value;
+             this.state.old_answer= datasource[j].correct_answer;
+             this.state.edit_id= datasource[j].id;
+             this.setState({
+               IsEditJudge:true,
+             })
+            
+
+            console.log(this.state.old_stem);
           } else {
             this.setState({
               old_stem: datasource[j].stem,
@@ -450,7 +502,7 @@ class TeacherCenter extends React.Component {
     }
 
     axios
-    .get('http://127.0.0.1:8000/add_test_paper/1/'+values['paper_name']+'/'+values['course_id']+'/'+values['teacher_id']+'/'+summark,
+    .get('http://127.0.0.1:8000/add_test_paper/1/'+values['paper_name']+'/'+values['course_id']+'/2190100555/'+summark,
       { 
         headers:{'content-type':'application/x-www-form-urlencoded'},
 
@@ -458,9 +510,7 @@ class TeacherCenter extends React.Component {
     ).then((res)=>{
       console.log(res.data);
       id=res.data[0]['max(paper_id)'];
-    })
-
-    if(this.state.tempselect)
+      if(this.state.tempselect)
     for(let i=0;i<this.state.tempselect.length;i++){
       for(let j=0;j<datasource.length;j++){
         if(this.state.tempselect[i]==datasource[j].key){
@@ -488,6 +538,9 @@ class TeacherCenter extends React.Component {
         }
       }
     }
+    })
+
+    
 
 
 
@@ -846,14 +899,11 @@ class TeacherCenter extends React.Component {
                         </Modal>
                         <Modal visible={this.state.IsEditJudge} onCancel={this.handleCancleEditJudge} footer={null}>
                           <Form onFinish={this.EditJudge}>
-                            <Form.Item name='stem'>
-                            <Form
-                              labelCol={{span: 30,}} wrapperCol={{span: 30,}}
-                              layout="horizontal" onFinish={this.addjudgeques}>
+                            
+                    
                               <Form.Item label="题干" name="stem" disabled>
                               <TextArea
-                                placeholder="500字以内" autoSize={{ minRows: 3, maxRows: 6 }}>
-                                  {this.state.old_stem}
+                                placeholder="500字以内" autoSize={{ minRows: 3, maxRows: 6 }} value={this.state.old_stem}>
                                 </TextArea>
                               </Form.Item>
                               <Form.Item label="分数" name="value">
@@ -866,16 +916,16 @@ class TeacherCenter extends React.Component {
                                 </Radio.Group>
                               </Form.Item>
                               <Form.Item >
-                                <Button htmlType="submit">确定</Button>
+                                <Button htmlType="submit" >确定</Button>
                               </Form.Item>
-                            </Form>
-                            </Form.Item>
+                            
+                            
                           </Form>
                         </Modal>
                         <Modal visible={this.state.IsEditChoose} onCancel={this.handleCancleEditChoose}>
                             <Form
                             labelCol={{span: 30,}} wrapperCol={{span: 30,}}
-                            layout="horizontal" onFinish={this.addchooseques}>
+                            layout="horizontal" onFinish={this.EditChoose}>
 
                             <Form.Item label="题干" name="stem" disabled>
                               <TextArea placeholder="500字以内" autoSize={{ minRows: 3, maxRows: 6 }}>
@@ -914,7 +964,7 @@ class TeacherCenter extends React.Component {
                               </Radio.Group>
                             </Form.Item>
                             <Form.Item label="">
-                              <Button htmlType="submit" >确定</Button>
+                              <Button htmlType="submit"  >确定</Button>
                             </Form.Item>
                           </Form>
                         </Modal>
@@ -922,7 +972,7 @@ class TeacherCenter extends React.Component {
                         <Button type="primary" style={{margin: '0 30px 0 0'}} onClick={this.showModal3}>自动生成试卷</Button>
                         <Button type="primary" onClick={this.showModal} style={{margin: '0 30px 0 0'}}>添加题目</Button>
                         <Button type="primary" onClick={this.showModal4} style={{margin: '0 30px 0 0'}}>批量导入题目</Button>
-                        <Button type='primary' onClick={this.showEdit} style={{margin: '0 30px 0 0'}}>编辑</Button>
+                        <Button type='primary' onClick={()=>{this.showEdit(selectedRowKeys)}} style={{margin: '0 30px 0 0'}}>编辑</Button>
                         <Button type="primary" onClick={() => { this.deleteques(selectedRowKeys) }} style={{margin: '0 30px 0 0'}} danger>删除</Button>
                     </div>
                     <div id="testing"></div>

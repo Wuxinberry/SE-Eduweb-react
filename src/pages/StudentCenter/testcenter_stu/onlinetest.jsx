@@ -98,11 +98,12 @@ function bac(){
   
           }
         ).then((res)=>{
+          console.log(res.data);
           datasource.push({
             tid:i,
             name:res.data[0].exam_id,
             eid:res.data[0].exam_id,
-            time:res.data[0].start_time,
+            time:res.data[0].end_time,
             states:res.data[0].state,
             teacher:res.data[0].teacher_id,
             course:res.data[0].course_id
@@ -139,6 +140,17 @@ class StudentCenter extends React.Component {
     console.log(this.state.columns);
     console.log(datasource);
     console.log(456);
+    
+    console.log('updatefinish');
+    axios
+    .get('http://127.0.0.1:8000/examstateupdate',
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+
+    })
   }
   handleClick = e => {
     console.log('click ', e);

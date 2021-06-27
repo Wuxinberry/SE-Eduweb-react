@@ -49,9 +49,18 @@ class introdu extends React.Component {
     pid: this.props.match.params.pid,
     current:'mail',
     ttdata:[{'exam_id':0}],
+    examinfo:[{'exam_id':0}],
     };
-
-
+    axios
+    .get('http://127.0.0.1:8000/exam/query/'+this.state.pid,
+          { 
+            headers:{'content-type':'application/x-www-form-urlencoded'},
+  
+          }
+        ).then((res)=>{
+          console.log(res.data);
+          this.setState({examinfo:res.data});
+    })
     axios
     .get('http://127.0.0.1:8000/showanswerallstu/'+this.state.pid,
           { 
@@ -60,8 +69,10 @@ class introdu extends React.Component {
           }
         ).then((res)=>{
           console.log(res.data);
+          if(res.data.length>0)
           this.setState({ttdata:res.data});
           console.log(this.state.ttdata)
+          data=[];
           for(let i=0;i<=res.data.length-1;i++){
             data.push({
               tid:i,
@@ -92,7 +103,7 @@ class introdu extends React.Component {
           <div className="logo" />
           <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
           <Menu.Item key="1" icon={<LeftOutlined />}>
-            <Link to="/testcenter_tea/testpublish">
+            <Link to="/testcenter_tea/testexam">
               返回题目列表
             </Link>
           </Menu.Item>
@@ -119,7 +130,7 @@ class introdu extends React.Component {
 
         <Layout className="site-layout" style={{color:'white', marginLeft: 200 }}>
             
-            <div style={{ color:'black', fontSize: '2em', marginLeft: 20 }}>试卷序号：{this.state.ttdata[0]['paper_id']}</div>
+            <div style={{ color:'black', fontSize: '2em', marginLeft: 20 }}>试卷序号：{this.state.examinfo[0]['paper_id']}</div>
             
             <Divider />
             

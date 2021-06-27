@@ -26,12 +26,23 @@ class introdu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-    tstart:false,
+    tstart:true,
+    bable:true,
     eid: this.props.match.params.eid,
     current:'mail',
     examinfo:[{'start_time':0,'end_time':0,'state':'—— ——'}],
     score:0
     };
+
+    axios
+    .get('http://127.0.0.1:8000/examstateupdate',
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+
+    })
     axios
     .get('http://127.0.0.1:8000/exam/query/'+this.state.eid,
           { 
@@ -40,13 +51,54 @@ class introdu extends React.Component {
           }
         ).then((res)=>{
           console.log(res.data);
-          if(res.data[0]['state']=='已开始'){
-            this.setState({tstart:false});
-          }
+          let ttts=true;
+          let ttts2=true;
+          let kkk=res.data[0]['state'];
+
           this.setState({examinfo:res.data});
+
+
+          axios
+            .get('http://127.0.0.1:8000/answerpaper/query/3190100666/'+this.state.eid,
+              { 
+                headers:{'content-type':'application/x-www-form-urlencoded'},
+
+              }
+            ).then((res)=>{
+              console.log(res.data);
+              if(res.data.length==0){
+                if(kkk=='进行中'){
+                  this.setState({tstart:false});
+                  this.setState({bable:false});
+                }
+                if(kkk=='未开始'){
+                  this.setState({tstart:true});
+                  this.setState({bable:true});
+                }
+                if(kkk=='已结束'){
+                  this.setState({tstart:false});
+                  this.setState({bable:false});
+                }
+              }
+              else{
+                if(kkk=='进行中'){
+                  this.setState({tstart:true});
+                  this.setState({bable:true});
+                }
+                if(kkk=='未开始'){
+                  this.setState({tstart:true});
+                  this.setState({bable:true});
+                }
+                if(kkk=='已结束'){
+                  this.setState({tstart:false});
+                  this.setState({bable:false});
+                }
+              }
+            })
     })
+    
     axios
-    .get('http://127.0.0.1:8000/answerpaper/query/1/'+this.state.eid,
+    .get('http://127.0.0.1:8000/answerpaper/query/3190100666/'+this.state.eid,
           { 
             headers:{'content-type':'application/x-www-form-urlencoded'},
   
@@ -91,7 +143,7 @@ class introdu extends React.Component {
               题目列表
               </Link>
           </Menu.Item>
-            <Menu.Item key="4" icon={<OrderedListOutlined />} disabled={this.state.tstart}>
+            <Menu.Item key="4" icon={<OrderedListOutlined />} disabled={this.state.bable}>
             <Link to={"/testcenter_stu/testpaper/testrank/"+this.state.eid}>
               排名
               </Link>

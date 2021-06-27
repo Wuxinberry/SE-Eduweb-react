@@ -42,6 +42,15 @@ function exam_state_judge(exam_start_time, exam_end_time) {
 let datasource=[];
 
 function bac(){
+  axios
+    .get('http://127.0.0.1:8000/examstateupdate',
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+
+    })
   console.log(123);
   if(datasource.length==0)
   axios
@@ -52,6 +61,7 @@ function bac(){
       }
     ).then((res)=>{
       let texamid=res.data;
+      datasource=[];
       for(let i=0;i<=texamid.length-1;i++){
         axios
         .get('http://127.0.0.1:8000/show_test_paperbyid/'+texamid[i]['paper_id'],
@@ -61,6 +71,7 @@ function bac(){
           }
         ).then((res)=>{
             console.log(res.data);
+            
             datasource.push({
                 tid:i,
                 paper_name:res.data[0]['paper_name'],

@@ -36,6 +36,16 @@ class introdu extends React.Component {
     score:0
     };
     axios
+    .get('http://127.0.0.1:8000/examstateupdate',
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+
+    })
+
+    axios
     .get('http://127.0.0.1:8000/exam/query/'+this.state.pid,
           { 
             headers:{'content-type':'application/x-www-form-urlencoded'},
@@ -70,7 +80,7 @@ class introdu extends React.Component {
           <div className="logo" />
           <Menu theme="dark" mode="inline" defaultSelectedKeys={['2']}>
             <Menu.Item key="1" icon={<LeftOutlined />}>
-            <Link to="/testcenter_tea/testpublish">
+            <Link to="/testcenter_tea/testexam">
               返回题目列表
             </Link>
           </Menu.Item>

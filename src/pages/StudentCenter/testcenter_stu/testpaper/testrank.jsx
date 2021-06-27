@@ -46,24 +46,35 @@ class introdu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-    eid: this.props.match.params.eid,
+    pid: this.props.match.params.eid,
     current:'mail',
+    tstart:true,
     ttdata:[{'exam_id':0}],
+    examinfo:[{'exam_id':0}],
     };
-
-
     axios
-    .get('http://127.0.0.1:8000/showanswerallstu/'+this.state.eid,
+    .get('http://127.0.0.1:8000/exam/query/'+this.state.pid,
           { 
             headers:{'content-type':'application/x-www-form-urlencoded'},
   
           }
         ).then((res)=>{
           console.log(res.data);
+          this.setState({examinfo:res.data});
+    })
+    axios
+    .get('http://127.0.0.1:8000/showanswerallstu/'+this.state.pid,
+          { 
+            headers:{'content-type':'application/x-www-form-urlencoded'},
+  
+          }
+        ).then((res)=>{
+
+          console.log(res.data);
           if(res.data.length>0)
           this.setState({ttdata:res.data});
-
           console.log(this.state.ttdata)
+          data=[];
           for(let i=0;i<=res.data.length-1;i++){
             data.push({
               tid:i,
@@ -93,23 +104,23 @@ class introdu extends React.Component {
         >
           <div className="logo" />
           <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
-            <Menu.Item key="1" icon={<LeftOutlined />}>
+          <Menu.Item key="1" icon={<LeftOutlined />}>
             <Link to="/testcenter_stu">
               返回题目列表
             </Link>
           </Menu.Item>
             <Menu.Item key="2" icon={<VideoCameraOutlined />}>
-            <Link to={"/testcenter_stu/testpaper/testintroduce/"+this.state.eid}>
+            <Link to={"/testcenter_stu/testpaper/testintroduce/"+this.state.pid}>
               考试概况
             </Link>
           </Menu.Item>
-            <Menu.Item key="3" icon={<EditOutlined />}>
-            <Link to={"/testcenter_stu/testpaper/testquestions/"+this.state.eid}>
+            <Menu.Item key="3" icon={<EditOutlined />} >
+            <Link to={"/testcenter_stu/testpaper/testquestions/"+this.state.pid}>
               题目列表
               </Link>
           </Menu.Item>
             <Menu.Item key="4" icon={<OrderedListOutlined />}>
-            <Link to={"/testcenter_stu/testpaper/testrank/"+this.state.eid}>
+            <Link to={"/testcenter_stu/testpaper/testrank/"+this.state.pid}>
               排名
               </Link>
           </Menu.Item>
@@ -121,7 +132,7 @@ class introdu extends React.Component {
 
         <Layout className="site-layout" style={{color:'white', marginLeft: 200 }}>
             
-            <div style={{ color:'black', fontSize: '2em', marginLeft: 20 }}>试卷序号：{this.state.eid}</div>
+            <div style={{ color:'black', fontSize: '2em', marginLeft: 20 }}>试卷序号：{this.state.examinfo[0]['paper_id']}</div>
             
             <Divider />
             

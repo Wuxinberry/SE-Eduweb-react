@@ -42,6 +42,16 @@ function exam_state_judge(exam_start_time, exam_end_time) {
 let datasource=[];
 
 function bac(){
+
+  axios
+    .get('http://127.0.0.1:8000/examstateupdate',
+      { 
+        headers:{'content-type':'application/x-www-form-urlencoded'},
+
+      }
+    ).then((res)=>{
+
+    })
   console.log(123);
   if(datasource.length==0)
   axios
@@ -52,6 +62,7 @@ function bac(){
       }
     ).then((res)=>{
       let texamid=res.data;
+      datasource=[];
       for(let i=0;i<=texamid.length-1;i++){
         datasource.push({
           tid:i,
@@ -66,7 +77,7 @@ function bac(){
       return 1;
     })
 }
-class StudentCenter extends React.Component {
+class asd extends React.Component {
   state = {
     current:'mail',
     visible: false,
@@ -83,7 +94,6 @@ class StudentCenter extends React.Component {
       },
     ],
   };
-
   showModal = () => {
     this.setState({
       visible: true,
@@ -113,7 +123,7 @@ class StudentCenter extends React.Component {
     // 拼接考试时间
     let start_time = exam_date + " " + exam_start_time;
     let end_time = exam_date + " " + exam_end_time;
-    let state = exam_state_judge(start_time, end_time);
+    let state ='未开始';
     // 组合url参数
     let exam_params = paper_id + "/" + course_id + "/" + teacher_id + "/" +
       start_time + "/" + end_time + "/" + state;
@@ -220,4 +230,4 @@ class StudentCenter extends React.Component {
 
 
 }
-export default StudentCenter;
+export default asd;
